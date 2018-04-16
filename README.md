@@ -8,7 +8,7 @@ https://www.ethereum.org/cli
 
 ### Chocolatey
 https://davidburela.wordpress.com/2016/11/18/how-to-install-truffle-testrpc-on-windows-for-blockchain-development/
-* Install chocolatey (alternatively install Ubuntu subsystem for Windows 10 from Microsoft store)
+* This is for installing chocolatey (alternatively install Ubuntu subsystem for Windows 10 from Microsoft store)
 * Go to https://chocolatey.org/ and follow installation instruction. 
 In my case:
   * Right click windows icon, click "Windows PowerShell (Admin)"
@@ -19,7 +19,7 @@ In my case:
     ```
 
 ### Windows Tools with Chocolatey
-* Install windows tools with chocolatey
+* This is for installing windows tools with chocolatey
 * Restart PowerShell (run as administrator) (As advised during chocolatey install)
 * Type and run
   ```bash
