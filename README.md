@@ -51,7 +51,7 @@ In my case:
 * Install metamask addon in your favourite browser
   https://metamask.io/
   
-### Development
+## Development
 * Create empty folder in your work directory
 * Open PowerShell for regular user (non Admin)
 * Go to the newly created folder by using `cd`, example
@@ -87,7 +87,7 @@ In my case:
 * HelloWorld - class name - use capital letter for first letter and use camel casing
 * Constructor function - gets called once only when contract gets deployed to a network
 * Add following after constructor function:
-
+  ```
     string private message;
    
     function getMessage () constant returns (string) {
@@ -96,6 +96,7 @@ In my case:
     function setMessage(string newMessage) {
         message = newMessage;
     }
+  ```
 * To be able to deploy this contract, we need a migration - specific to this contract
 * Type and run
   ```bash
@@ -122,7 +123,7 @@ In my case:
   ```
 * Then
   ```bash
-  truffle migrate  --reset
+  truffle migrate --reset
   ```
 * And finally
   ```bash
@@ -161,22 +162,23 @@ In my case:
 * Type and run
   ```bash
   contract.getMessage.call()
-  Expect to see 'New Test Message'
+  ```
+  Expect to see `'New Test Message'`
 * Now we will deploy this contract on Rinkeby testnet
 * Exit ganache-cli -> Go to ganache-cli PowerShell & press ctrl+c
 * Run Rinkeby on the computer: 
   ```bash
-  geth --rinkeby  --rpc  --rpcapi web3,db,personal,eth,net
+  geth --rinkeby --rpc --rpcapi web3,db,personal,eth,net
   ```
   (must use small r in `Rinkeby`)
 * IPC endpoint opened: we need this IPC end point to be able to run geth javascript console to  interact with contracts deployed on Rinkeby testnet 
   example:
   ```bash
   INFO [04-16|00:08:34] IPC endpoint opened                      url=\\\\.\\pipe\\geth.ipc
-  INFO [04-16|00:08:34] HTTP endpoint opened                     url=http://127.0.0.1:8545 cors= vhosts=localhost
   ```
 * Launch another PowerShell
-* ```bash
+* Type and run
+  ```bash
   geth attach ipc:\\.\pipe\geth.ipc
   ```
   **Note** that the backslash \ got escaped. so we have to remove 1 backslash for each backslash (eg \\ becomes \)
@@ -207,29 +209,31 @@ In my case:
   ```
 * In javascript console (the one started with `geth attach`): Unlock account over Rinkeby: 
   ```bash
-    personal.unlockAccount("_0x...Your account number ...")
+    personal.unlockAccount("0x...your account number ...")
   ```
-  —> enter passphrase
-* How to copy and paste in PowerShell
-  Copy: highlight the word then press `Enter`
-  Paste: right click mouse
+  —> enter passphrase when prompted
+* How to copy and paste in PowerShell?
+  Copy -> highlight the word then press `Enter`
+  Paste -> right click mouse
 * We need to fund this account and also ensure its imported into metamask
 * Import into metamask = import via json file found in (example path)
-  ```C:\Users\(user)\AppData\Roaming\Ethereum\rinkeby\keystore```
+  ```C:\Users\(username)\AppData\Roaming\Ethereum\rinkeby\keystore```
   If not able to see `AppData` folder, click the View menu (at top of windows explorer) and ensure "Hidden items" is ticked
 * Fund this account using faucet through twitter
   example, post this:
-    "Requesting faucet funds into 0x...your account number... on the #Rinkeby #Ethereum test network."
-  in your Twitter or Facebook or Google plus then get the link to your post and paste in
+  ```
+    Requesting faucet funds into 0x...your account number... on the #Rinkeby #Ethereum test network.
+  ```
+  in your Twitter or Facebook or Google plus public post, then get the link to it and paste in
   https://www.rinkeby.io/#faucet
 * Go back to the PowerShell for truffle console
 * Exit previous console (if haven't) by pressing ctrl+c
-* Type and run
+* Then type and run
   ```
   truffle migrate --network Rinkeby
   ```
   will see
-    "Using network 'rinkeby'
+    "Using network 'rinkeby'  
     Network up to date"
 * Check the transaction on Rinkeby.etherscan.io
 * Go to remix.ethereum.org which is remix solidity ide to get ABI for the contract
@@ -238,7 +242,7 @@ In my case:
 * Click on `details` and copy ABI
 * Go to the geth PowerShell and paste this
   ```
-  abi = [ _what was copied from remix_]
+  abi = [ _what was copied from remix_ ]
   ```
   **Note** that need to remove the newline and make the ABI stuffs flat (all code in 1 line)
 * Just like we made contract object in truffle console, we will make one in JS console like this: 
