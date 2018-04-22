@@ -54,7 +54,7 @@ In my case:
 ### Text editor
 * Sublime/ Visual Studio/ jet brains IDE with plugin, intellij IDEA, sublime text - solidity syntax and linter plugins, atom
 
-## Development
+## Development (Part 1)
 * Create empty folder in your work directory
 * Open PowerShell for regular user (non Admin)
 * Go to the newly created folder by using `cd`, example
@@ -296,3 +296,124 @@ In my case:
   instance.setMessage("new message", {from: eth.accounts[0]})
   ```
 * Check for transaction on Rinkeby.etherscan.io
+
+## Development (Part 2)
+
+### Deploying to testnet
+
+In this part we will deploy truffle contract to Ropsten test server and attempt to exchange ether
+
+* Instead of running the Ropsten testnet locally, we will use a remote testnet.
+
+* Launch PowerShell
+* In the command line, enter this
+  ```
+  geth attach http://13.229.195.247:8545
+  ```
+  You should see that Geth is running
+
+* If this is your first time in this testnet, create your own account. Type the following command in the Geth Javascript console:
+  ```
+  personal.newAccount("AwesomePassphrase")
+  ```
+  (Substitute `AwesomePassphrase` with your own passphrase)
+
+  You should see something like this:
+  ```
+  "0xa8390083b22754a247a6b61b8b9f33ac85aaff88"
+  ```
+  This is your account address. Copy from the console and note it down as we will be using this later on.
+
+* Fund the account using faucet
+  - Go to http://faucet.ropsten.be:3001/
+  - Enter your account address (The "0x..." string from previous step)
+  - Click "Send me 1 test ether!"
+
+* Check your account
+  - Go to https://ropsten.etherscan.io/
+  - Search for your address
+  - Click the link under TxHash
+  - You should see some ether transfer in progress or even completed
+  - Note the gas limit here. (In my case it is `314150`)
+
+* We will attempt to deploy contract from part 1 first.
+
+* Edit the truffle.js to add the following configuration
+  ```
+  ropsten: {
+    host: "13.229.195.247",
+    port: 8545,
+    network_id: "3",
+    from: "0x....", // your account address from previous step
+    gas: 314150
+  }
+  ```
+
+* Go back to Geth console and unlock the account.
+  This time we will define duration of unlock to keep it unlocked for a longer while.
+  ```
+  personal.unlockAccount("0x...your account address ...", "AwesomePassphrase", 600)
+  ```
+  600 = 10 minutes.
+  You should see
+  ```
+  true
+  ```
+
+* Launch another PowerShell
+  Go to your code directory
+
+* Type and run following command
+  ```
+  truffle compile
+  ```
+
+* Followed by
+  ```
+  truffle migrate --network ropsten --reset
+  ```
+
+* You should see something like this
+  ```
+  Using network 'ropsten'.
+
+  Running migration: 1_initial_migration.js
+    Deploying Migrations...
+    ... 0x02e77b1ae6fa303a80fd9a2bdffed1c9cd46b19f40498ed3c77f79d35d0f3612
+    Migrations: 0xc593bc1a1b7c6927f07979f87a69afa1873de44e
+  Saving successful migration to network...
+    ... 0x41126df0820900c8b169c4e18ba94f80ca9b12b7d345c1b546cde613c2c901d3
+  Saving artifacts...
+  Running migration: 1523804593_hello_world.js
+    Deploying HelloWorld...
+    ... 0x923716a274615ee2acea556b81ea18c2c153947bf99a22c25dae5ea79feed08b
+    HelloWorld: 0x6f8fc170cbedbfa9f0245a0bbd03ff4c2f602f44
+  Saving successful migration to network...
+    ... 0xa70a451f4639eb8bdc3d8c366aad657fc59057da2c0cecfe855da105a0147e9e
+  Saving artifacts...
+  ```
+
+* If there is error, note the error message. Here are common causes and ways to troubleshoot gas limit error:
+  https://hanezu.github.io/posts/Gas-Limit-Error-when-deploy-Truffle-project-on-Private-Network.html
+
+  For example:
+  ```
+  Using network 'ropsten'.
+
+  Running migration: 1_initial_migration.js
+    Deploying Migrations...
+    ... undefined
+  Error encountered, bailing. Network state unknown. Review successful transactions manually.
+  Error: authentication needed: password or unlock
+      at Object.InvalidResponse (C:\Users\user\AppData\Roaming\npm\node_modules\truffle\build\webpack:\~\web3\lib\web3\errors.js:38:1)
+  ...
+  ```
+  Note the error `Error: authentication needed: password or unlock`. Which means we have to unlock the account in Geth Javascript console.
+
+* Check your account at https://ropsten.etherscan.io/
+  You should see some transactions happening.
+
+* To exit the ropsten testnet, type and run
+  ```
+  exit
+  ```
