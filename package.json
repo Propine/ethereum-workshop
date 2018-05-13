@@ -1,0 +1,26 @@
+{
+  "name": "workshop",
+  "version": "1.0.0",
+  "description": "https://www.ethereum.org/cli\r * Download latest stable binary (.exe) 32/ 64 bit (depending on platform)\r * double click to install it",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PropineCapital/workshop.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PropineCapital/workshop/issues"
+  },
+  "homepage": "https://github.com/PropineCapital/workshop#readme",
+  "dependencies": {
+    "zeppelin-solidity": "1.9.0"
+  }
+}
