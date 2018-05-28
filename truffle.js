@@ -18,8 +18,9 @@ module.exports = {
       host: "13.229.195.247",
       port: 8545,
       network_id: "3",
-      from: "0xca275fd95d26c00c9d650f99d5f0ffbe5d344c18",
-      gas: 4500000
+      from: "0xb28f29e29e61dfd6d1af9d035e5d3d6598b536ea",
+      gas: 4600000,
+      gasPrice: 10000000000
     }
   }
 };
