@@ -11,3 +11,5 @@
 3. ICO
     * [Part 1](notes/ICO-1.md)
     * [Part 2](notes/ICO-2.md)
+
+4. [Security](notes/SECURITY.md)
