@@ -64,7 +64,7 @@ https://blockonomi.com/what-are-smart-contracts/#Potential_Use_Cases_of_Smart_Co
   ```
 
   Note:
-  * You may need to recreate your personal account (refer to `Development (Part 2)` in README)
+  * You may need to recreate your personal account (refer to `Development (Part 2)` in [Getting Started](GETTING-STARTED.md))
   * If you do recreate, remember to update the truffle.js config
   * If need to, request funding using faucet.
 
