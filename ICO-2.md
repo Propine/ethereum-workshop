@@ -188,3 +188,247 @@ Ref: https://blog.zeppelin.solutions/how-to-create-token-and-initial-coin-offeri
   ```
   '0.01'
   ```
+
+### Adding refund features
+
+* Refund features are useful for cases like for example,
+  * token purchases limit reached and we have to refund purchases done after that
+  * ICO does not meet minimum requirement and has to be cancelled
+
+* In this exercise we will do a simple refund feature.
+  We will utilise Open-Zeppelin RefundableCrowdsale instead of reinventing the wheel.
+
+* Open `MyTokenCrowdsale.sol`
+  * Remove `TimedCrowdsale` and add `FinalizableCrowdsale`, `RefundableCrowdsale` libs like this:
+  ```
+  import 'zeppelin-solidity/contracts/crowdsale/distribution/FinalizableCrowdsale.sol';
+  import 'zeppelin-solidity/contracts/crowdsale/distribution/RefundableCrowdsale.sol';
+  import 'zeppelin-solidity/contracts/crowdsale/emission/MintedCrowdsale.sol';
+
+  ```
+
+  * Inherit it in `MyTokenCrowdsale` like so,
+  ```
+  contract MyTokenCrowdsale is RefundableCrowdsale, MintedCrowdsale {
+  ```
+
+  * Edit the constructor,
+  ```
+    function MyTokenCrowdsale
+    (
+      uint256 _openingTime,
+      uint256 _closingTime,
+      uint256 _rate,
+      address _wallet,
+      uint256 _goal,
+      MintableToken _token
+    )
+    public
+    Crowdsale(_rate, _wallet, _token)
+    TimedCrowdsale(_openingTime, _closingTime)
+    FinalizableCrowdsale()
+    RefundableCrowdsale(_goal)
+    {
+      // constructor
+    }
+  ```
+
+  And add requirement such that the whole source should end up like this:
+  ```
+  pragma solidity ^0.4.4;
+
+  import './MyToken.sol';
+  import 'zeppelin-solidity/contracts/crowdsale/distribution/FinalizableCrowdsale.sol';
+  import 'zeppelin-solidity/contracts/crowdsale/distribution/RefundableCrowdsale.sol';
+  import 'zeppelin-solidity/contracts/crowdsale/emission/MintedCrowdsale.sol';
+
+  contract MyTokenCrowdsale is RefundableCrowdsale, MintedCrowdsale {
+    function MyTokenCrowdsale
+    (
+      uint256 _openingTime,
+      uint256 _closingTime,
+      uint256 _rate,
+      address _wallet,
+      uint256 _goal,
+      MintableToken _token
+    )
+    public
+    Crowdsale(_rate, _wallet, _token)
+    TimedCrowdsale(_openingTime, _closingTime)
+    FinalizableCrowdsale()
+    RefundableCrowdsale(_goal)
+    {
+
+    }
+
+  }
+  ```
+
+* We will edit the migration script to this.
+  For testing refund, the end time is intentionally set to 20 minutes after opening time.
+  ```
+  const MyTokenCrowdsale = artifacts.require('./MyTokenCrowdsale.sol');
+  const MyToken = artifacts.require('./MyToken.sol');
+
+  module.exports = function(deployer, network, accounts) {
+    const openingTime = Math.round((new Date(Date.now() + 180000).getTime())/1000);  // 180000 ms = 3 mins in future
+    const closingTime = openingTime + 1200; // 86400 * 20; // 20 days
+    const rate = new web3.BigNumber(1);
+    const wallet = '0x6147201d01d6cbb9584d97aa7f000e0ee32b01af'; // substitute with your wallet address
+
+    return deployer
+      .then(() => {
+          return deployer.deploy(MyToken);
+      })
+      .then(() => {
+          return deployer.deploy(
+              MyTokenCrowdsale,
+              openingTime,
+              closingTime,
+              rate,
+              wallet,
+              2000000000000000000, // Goal: 2 ETH
+              MyToken.address
+          );
+      });
+  };
+  ```
+
+* ```
+  truffle compile
+  ```
+  ```
+  truffle migrate --network ropsten --reset
+  ```
+  Expect to see:
+  ```
+  Using network 'ropsten'.
+
+  Running migration: 1527439956_my_token_crowdsale.js
+    Running step...
+    Replacing MyToken...
+    ... 0xec205eb30a22f2539d5c43353f6ea32422bb62e4ec4cfb6c813199d2f33a553c
+    MyToken: 0x5ec58d8208ca8f9a19ea919bb935bc1d50fac329
+    Replacing MyTokenCrowdsale...
+    ... 0x7f00b581721063eb670adcab0ecaedfdf259712730970a580732ff250713245d
+    MyTokenCrowdsale: 0xae8228440e08a7ede5d414aa18dcf09540807981
+  Saving artifacts...
+  ```
+  Note that your Token and Crowdsale address have been replaced at this point
+
+## Interact with the Crowdsale contracts
+
+* As usual, ensure that you are connected to Ropsten testnet and your personal & purchaser accounts are unlocked (in Ropsten testnet)
+
+* Launch truffle console
+  ```
+  truffle console --network ropsten
+  ```
+
+* Define your purchaser. In my case I appointed accounts[3]
+  ```
+  purchaser = web3.eth.accounts[3]
+  ```
+
+* Purchase as usual
+  ```
+  MyTokenCrowdsale.deployed().then(inst => { crowdsale = inst })
+  ```
+  ```
+  crowdsale.token().then(addr => { tokenAddress = addr } )
+  ```
+  ```
+  myTokenInstance = MyToken.at(tokenAddress)
+  ```
+  ```
+  myTokenInstance.transferOwnership(crowdsale.address)
+  ```
+  ```
+  myTokenInstance.balanceOf(purchaser).then(balance => balance.toString(10))
+  ```
+  // verify balance (expect '0')
+  ```
+  MyTokenCrowdsale.deployed().then(inst => inst.sendTransaction({ from: purchaser, value: web3.toWei(0.05, "ether")}))
+  ```
+  // The sendTransaction will take some time
+  ```
+  myTokenInstance.balanceOf(purchaser).then(balance => purchaserMyTokenBalance = web3.fromWei(balance.toString(10), "ether"))
+  ```
+  // verify balance (expect '0.05')
+
+* Here are a few functions to check various things:
+  * How much the campaign raised:
+  ```
+  crowdsale.weiRaised()
+  ```
+  * Goal reached?
+  ```
+  crowdsale.goalReached()
+  ```
+  // true == reached, false == not yet
+  * When campaign ends?
+  ```
+  crowdsale.closingTime()
+  ```
+  * What deposit was made by purchaser?
+  ```
+  crowdsale.vault()
+  ```
+  Expect to see something like this
+  ```
+  '0x9caffec87551076b996e384f3b36f564a7fd5149'
+  ```
+  ```
+  var vault = RefundVault.at('0x9caffec87551076b996e384f3b36f564a7fd5149')
+  ```
+  ```
+  vault.deposited('0x... address of the investor ...')
+  ```
+  * Has campaign ended?
+  ```
+  crowdsale.hasClosed()
+  ```
+  // true == ended, false == not yet
+
+  * These functions can be seen when we run
+  ```
+  crowdsale
+  ```
+
+* Issue the refund
+  Firstly check and ensure the crowdsale has ended and goal is not reached
+  ```
+  crowdsale.goalReached()
+  ```
+  expect `false`
+
+  ```
+  crowdsale.closingTime()
+  ```
+  expect `true`
+
+  ```
+  crowdsale.goalReached()
+  ```
+  expect `false`
+
+  So we will finalize it
+  ```
+  crowdsale.finalize()
+  ```
+
+  And finally refund can be claimed, like this
+  ```
+  crowdsale.claimRefund({from:purchaser})
+  ```
+
+* Check the address of the `crowdsale.vault()` in https://ropsten.etherscan.io/ . There should be some transaction on the purchase & refunds.
+
+* Check your purchaser record in https://ropsten.etherscan.io/ too. There should be a refund.
+
+* What can we do next? There are a few experiments that we can do on this feature, eg:
+  * Should deny refund before crowdsale ends
+  * Should deny refunds after end if goal was reached
+  * Should forward funds to wallet after end if goal was reached
+
+  Do try these scenario as exercises.
