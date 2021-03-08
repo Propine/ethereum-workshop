@@ -10,6 +10,8 @@ npm install -g truffle
 
 ## Install Ganache
 
+Go to the below link, download the installer file and simply install it.
+
 http://truffleframework.com/ganache/
 
 ## Starting a Truffle project
@@ -22,7 +24,7 @@ truffle init
 
 ## Configure Truffle to talk to Ganache
 
-In truffle.js
+In truffle-config.js, find 'networks' section and uncomment the following
 
 ``` javascript
 module.exports = {
@@ -80,7 +82,7 @@ To generate a migration, run this command
 truffle create migration HelloWorld
 ```
 
-In the generated migration file, copy the following in the migration.
+In the generated migration file in the 'migrations' folder, copy the following in the migration.
 
 ```
 const HelloWorld = artifacts.require('HelloWorld');
@@ -118,7 +120,49 @@ Spanning multiple lines.
 
 Writing artifacts to ./build/contracts
 ```
+## => Compilation get failed here with ParserError, SyntaxError, and TypeError. 
+## I had to change the 'constant' value to 'view'/'pure' where both of which couldn't resolve the issue. PFB the compilation errors:
+```
+mishal@Mishals-MacBook-Pro ethereum-workshop % truffle compile
 
+Compiling your contracts...
+===========================
+> Compiling ./contracts/HelloWorld.sol
+> Compiling ./contracts/Migrations.sol
+
+> Compilation warnings encountered:
+
+    /Users/mishal/ethereum-workshop/contracts/HelloWorld.sol:5:3: Warning: This declaration shadows an existing declaration.
+  function HelloWorld() {
+  ^ (Relevant source part starts here and spans across multiple lines).
+/Users/mishal/ethereum-workshop/contracts/HelloWorld.sol:4:1: The shadowed declaration is here:
+contract HelloWorld {
+^ (Relevant source part starts here and spans across multiple lines).
+
+/Users/mishal/ethereum-workshop/contracts/HelloWorld.sol:5:3: SyntaxError: Functions are not allowed to have the same name as the contract. If you intend this to be a constructor, use "constructor(...) { ... }" to define it.
+  function HelloWorld() {
+  ^ (Relevant source part starts here and spans across multiple lines).
+,/Users/mishal/ethereum-workshop/contracts/HelloWorld.sol:5:3: SyntaxError: No visibility specified. Did you intend to add "public"?
+  function HelloWorld() {
+  ^ (Relevant source part starts here and spans across multiple lines).
+,/Users/mishal/ethereum-workshop/contracts/HelloWorld.sol:11:3: SyntaxError: No visibility specified. Did you intend to add "public"?
+  function getMessage () view returns (string) {
+  ^ (Relevant source part starts here and spans across multiple lines).
+,/Users/mishal/ethereum-workshop/contracts/HelloWorld.sol:14:3: SyntaxError: No visibility specified. Did you intend to add "public"?
+  function setMessage(string newMessage) {
+  ^ (Relevant source part starts here and spans across multiple lines).
+,/Users/mishal/ethereum-workshop/contracts/HelloWorld.sol:11:40: TypeError: Data location must be "memory" for return parameter in function, but none was given.
+  function getMessage () view returns (string) {
+                                       ^----^
+,/Users/mishal/ethereum-workshop/contracts/HelloWorld.sol:14:23: TypeError: Data location must be "memory" for parameter in function, but none was given.
+  function setMessage(string newMessage) {
+                      ^---------------^
+
+Compilation failed. See above.
+Truffle v5.2.3 (core: 5.2.3)
+Node v12.21.0
+
+```
 ## Deploying your contract
 
 From your command line
